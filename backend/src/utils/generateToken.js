@@ -25,11 +25,11 @@
  *           - secure: Uses the `Secure` flag for HTTPS connections based on `COOKIE_SECURE` or `NODE_ENV`.
  *
  *   - generateVerificationToken:
- *       - Description: Generates a cryptographically secure random token for email verification.
+ *       - Description: Generates a cryptographically secure random 6-digit token for email verification.
  *       - Parameters: None.
  *       - Returns:
  *           - Type: String.
- *           - Description: A 32-byte random token encoded as a hexadecimal string.
+ *           - Description: A zero-padded 6-digit verification code.
  *
  * Usage:
  *   - Import the utility functions to use them in authentication workflows.
@@ -67,4 +67,4 @@ export const generateTokenAndSetCookie = (user, res) => {
 };
 
 export const generateVerificationToken = () =>
-    crypto.randomBytes(32).toString("hex");
+    crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");

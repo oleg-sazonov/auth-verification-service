@@ -61,6 +61,7 @@ import {
     generateVerificationToken,
     generateTokenAndSetCookie,
 } from "../utils/generateToken.js";
+import { sendVerificationEmail } from "../mailtrap/email.js";
 
 export const signup = async (req, res) => {
     try {
@@ -96,6 +97,8 @@ export const signup = async (req, res) => {
             const jwtToken = generateTokenAndSetCookie(newUser, res);
 
             await newUser.save();
+
+            await sendVerificationEmail(newUser, verificationToken);
 
             res.status(201).json({
                 user: {
