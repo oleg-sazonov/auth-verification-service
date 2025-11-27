@@ -1,7 +1,7 @@
 /**
  * Auth Controller
  * ---------------
- * Handles authentication-related operations such as user signup, login, and logout.
+ * Handles authentication-related operations such as user signup, email verification, login, and logout.
  *
  * Functions:
  *   - signup:
@@ -22,9 +22,31 @@
  *           4. Generates a verification token for email verification.
  *           5. Saves the new user to the database.
  *           6. Generates a JWT token and sets it as an HTTP-only cookie.
- *           7. Sends a success response with the user details (excluding sensitive fields).
+ *           7. Sends a verification email to the user.
+ *           8. Sends a success response with the user details (excluding sensitive fields).
  *       - Error Handling:
  *           - Returns appropriate error messages for validation errors, duplicate email, or server issues.
+ *
+ *   - verifyEmail:
+ *       - Description: Verifies the user's email using the provided verification token.
+ *       - Parameters:
+ *           - req:
+ *               - Type: Object.
+ *               - Required: Yes.
+ *               - Description: The Express request object containing the verification token.
+ *           - res:
+ *               - Type: Object.
+ *               - Required: Yes.
+ *               - Description: The Express response object used to send responses to the client.
+ *       - Workflow:
+ *           1. Validates the verification token.
+ *           2. Checks if the token is valid and not expired.
+ *           3. Marks the user's email as verified.
+ *           4. Sends a welcome email to the user.
+ *           5. Sends a success response with the user details (excluding sensitive fields).
+ *       - Error Handling:
+ *           - Returns appropriate error messages for invalid or expired tokens.
+ *           - Handles server errors gracefully.
  *
  *   - login:
  *       - Description: Placeholder for user login functionality.
@@ -52,7 +74,7 @@
  *
  * Usage:
  *   - Import the controller functions to use them in authentication routes.
- *       import { signup, login, logout } from "../controllers/auth.controller.js";
+ *       import { signup, verifyEmail, login, logout } from "../controllers/auth.controller.js";
  */
 
 import User from "../models/user.model.js";
@@ -61,7 +83,7 @@ import {
     generateVerificationToken,
     generateTokenAndSetCookie,
 } from "../utils/generateToken.js";
-import { sendVerificationEmail } from "../mailtrap/email.js";
+import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/emails.js";
 
 export const signup = async (req, res) => {
     try {
@@ -117,6 +139,45 @@ export const signup = async (req, res) => {
         if (error.name === "ValidationError") {
             return res.status(400).json({ message: error.message });
         }
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const verifyEmail = async (req, res) => {
+    // - - - - - - => 1 1 4 5 6 7. Verification token from email
+    const { verificationToken } = req.body;
+
+    try {
+        const user = await User.findOne({
+            verificationToken,
+            verificationTokenExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res
+                .status(400)
+                .json({ message: "Invalid or expired verification token" });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpires = undefined;
+        await user.save();
+
+        await sendWelcomeEmail(user);
+
+        res.status(200).json({
+            success: true,
+            message: "Email verified successfully",
+            user: {
+                ...user._doc,
+                password: undefined,
+                verificationToken: undefined,
+                verificationTokenExpires: undefined,
+            },
+        });
+    } catch (error) {
+        console.error("Error in verifyEmail controller:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };

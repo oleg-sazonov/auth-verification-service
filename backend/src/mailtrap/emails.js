@@ -26,17 +26,41 @@
  *           - Logs errors to the console if the email fails to send.
  *           - Throws an error with a descriptive message if the email fails.
  *
+ *   - sendWelcomeEmail:
+ *       - Description: Sends a welcome email to the user after successful email verification.
+ *       - Parameters:
+ *           - user:
+ *               - Type: Object.
+ *               - Required: Yes.
+ *               - Description: The user object containing the recipient's email and name.
+ *               - Fields:
+ *                   - email: The recipient's email address.
+ *                   - name: The recipient's name.
+ *       - Workflow:
+ *           1. Constructs the email content using the `WELCOME_EMAIL_TEMPLATE`.
+ *           2. Replaces placeholders in the template with the user's name.
+ *           3. Sends the email using the Mailtrap client.
+ *       - Error Handling:
+ *           - Logs errors to the console if the email fails to send.
+ *           - Throws an error with a descriptive message if the email fails.
+ *
  * Usage:
- *   - Import the function to send verification emails.
- *       import { sendVerificationEmail } from "../mailtrap/email.js";
+ *   - Import the functions to send emails.
+ *       import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/emails.js";
  *   - Example:
  *       await sendVerificationEmail(
  *           { email: "user@example.com", name: "John Doe" },
  *           "123456"
  *       );
+ *       await sendWelcomeEmail(
+ *           { email: "user@example.com", name: "John Doe" }
+ *       );
  */
 
-import { VERIFICATION_EMAIL_TEMPLATE } from "./emailTemplates.js";
+import {
+    VERIFICATION_EMAIL_TEMPLATE,
+    WELCOME_EMAIL_TEMPLATE,
+} from "./emailTemplates.js";
 import { mailtrapClient, mailtrapSender } from "./mailtrap.config.js";
 
 export const sendVerificationEmail = async (
@@ -44,16 +68,17 @@ export const sendVerificationEmail = async (
     verificationToken
 ) => {
     const recipients = [{ email }];
+    const htmlContent = VERIFICATION_EMAIL_TEMPLATE.replace(
+        "{verificationCode}",
+        verificationToken
+    ).replace("{username}", name);
 
     try {
         const response = await mailtrapClient.send({
             from: mailtrapSender,
             to: recipients,
             subject: "Verify your email address",
-            html: VERIFICATION_EMAIL_TEMPLATE.replace(
-                "{verificationCode}",
-                verificationToken
-            ).replace("{username}", name),
+            html: htmlContent,
             category: "Email Verification",
         });
 
@@ -61,5 +86,25 @@ export const sendVerificationEmail = async (
     } catch (error) {
         console.error("Error sending verification email:", error);
         throw new Error("Failed to send verification email: " + error.message);
+    }
+};
+
+export const sendWelcomeEmail = async ({ email, name }) => {
+    const recipients = [{ email }];
+    const htmlContent = WELCOME_EMAIL_TEMPLATE.replace("{username}", name);
+
+    try {
+        const response = await mailtrapClient.send({
+            from: mailtrapSender,
+            to: recipients,
+            subject: "Welcome to Our Service",
+            html: htmlContent,
+            category: "Welcome Email",
+        });
+
+        console.log("Welcome email sent:", response);
+    } catch (error) {
+        console.error("Error sending welcome email:", error);
+        throw new Error("Failed to send welcome email: " + error.message);
     }
 };
