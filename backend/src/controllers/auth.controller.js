@@ -61,7 +61,7 @@
  *               - Description: The Express response object used to send responses to the client.
  *
  *   - logout:
- *       - Description: Placeholder for user logout functionality.
+ *       - Description: Logs out the user by clearing the JWT cookie.
  *       - Parameters:
  *           - req:
  *               - Type: Object.
@@ -71,6 +71,11 @@
  *               - Type: Object.
  *               - Required: Yes.
  *               - Description: The Express response object used to send responses to the client.
+ *       - Workflow:
+ *           1. Clears the `jwt` cookie by setting it to an empty value and a past expiration date.
+ *           2. Sends a success response indicating the user has been logged out.
+ *       - Error Handling:
+ *           - Returns appropriate error messages for server issues.
  *
  * Usage:
  *   - Import the controller functions to use them in authentication routes.
@@ -186,6 +191,21 @@ export const login = async (req, res) => {
     res.send("Login route");
 };
 
-export const logout = async (req, res) => {
-    res.send("Logout route");
+export const logout = (req, res) => {
+    try {
+        // Clear the cookie by setting it to an empty value and a past expiration date
+        res.clearCookie("jwt", {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+        });
+
+        res.status(200).json({ success: true, message: "Logout successful" });
+    } catch (error) {
+        console.error("Error in logout controller:", error.message);
+        if (error.name === "ValidationError") {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: "Internal server error" });
+    }
 };
