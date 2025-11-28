@@ -49,16 +49,24 @@
  *           - Handles server errors gracefully.
  *
  *   - login:
- *       - Description: Placeholder for user login functionality.
+ *       - Description: Authenticates a user by verifying their email and password.
  *       - Parameters:
  *           - req:
  *               - Type: Object.
  *               - Required: Yes.
- *               - Description: The Express request object containing login credentials.
+ *               - Description: The Express request object containing login credentials (`email` and `password`).
  *           - res:
  *               - Type: Object.
  *               - Required: Yes.
  *               - Description: The Express response object used to send responses to the client.
+ *       - Workflow:
+ *           1. Finds the user by email in the database.
+ *           2. Compares the provided password with the hashed password in the database.
+ *           3. If valid, generates a JWT token and sets it as an HTTP-only cookie.
+ *           4. Updates the user's `lastLogin` field.
+ *           5. Sends a success response with the user details (excluding sensitive fields).
+ *       - Error Handling:
+ *           - Returns appropriate error messages for invalid credentials or server issues.
  *
  *   - logout:
  *       - Description: Logs out the user by clearing the JWT cookie.
@@ -188,7 +196,47 @@ export const verifyEmail = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    res.send("Login route");
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Invalid email or password" });
+        }
+
+        // Use optional chaining to handle case where user is null and avoid errors
+        const isPasswordValid = await bcrypt.compare(
+            password,
+            user?.password || ""
+        );
+
+        if (!user || !isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid username or password",
+            });
+        }
+
+        // Generate JWT token and set cookie
+        const token = generateTokenAndSetCookie(user, res);
+
+        user.lastLogin = Date.now();
+
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            user: {
+                ...user._doc,
+                password: undefined,
+            },
+        });
+    } catch (error) {
+        console.error("Error in login controller:", error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
 };
 
 export const logout = (req, res) => {
