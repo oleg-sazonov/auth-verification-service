@@ -31,11 +31,19 @@
  *           - Type: String.
  *           - Description: A zero-padded 6-digit verification code.
  *
+ *   - generatePasswordResetToken:
+ *       - Description: Generates a cryptographically secure random token for password reset.
+ *       - Parameters: None.
+ *       - Returns:
+ *           - Type: String.
+ *           - Description: A 32-byte hexadecimal string used as a password reset token.
+ *
  * Usage:
  *   - Import the utility functions to use them in authentication workflows.
  *       import {
  *           generateTokenAndSetCookie,
  *           generateVerificationToken,
+ *           generatePasswordResetToken,
  *       } from "../utils/generateToken.js";
  */
 
@@ -68,3 +76,6 @@ export const generateTokenAndSetCookie = (user, res) => {
 
 export const generateVerificationToken = () =>
     crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
+
+export const generatePasswordResetToken = () =>
+    crypto.randomBytes(32).toString("hex");

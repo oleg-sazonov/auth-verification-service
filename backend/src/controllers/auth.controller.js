@@ -1,7 +1,7 @@
 /**
  * Auth Controller
  * ---------------
- * Handles authentication-related operations such as user signup, email verification, login, and logout.
+ * Handles authentication-related operations such as user signup, email verification, login, logout, and password reset.
  *
  * Functions:
  *   - signup:
@@ -85,18 +85,44 @@
  *       - Error Handling:
  *           - Returns appropriate error messages for server issues.
  *
+ *   - forgotPassword:
+ *       - Description: Sends a password reset email to the user with a reset link.
+ *       - Parameters:
+ *           - req:
+ *               - Type: Object.
+ *               - Required: Yes.
+ *               - Description: The Express request object containing the user's email.
+ *           - res:
+ *               - Type: Object.
+ *               - Required: Yes.
+ *               - Description: The Express response object used to send responses to the client.
+ *       - Workflow:
+ *           1. Finds the user by email in the database.
+ *           2. Generates a password reset token and sets its expiration time.
+ *           3. Saves the token and expiration time to the user's record.
+ *           4. Sends a password reset email to the user with the reset link.
+ *           5. Sends a success response indicating the email was sent.
+ *       - Error Handling:
+ *           - Returns appropriate error messages for user not found or server issues.
+ *
  * Usage:
  *   - Import the controller functions to use them in authentication routes.
- *       import { signup, verifyEmail, login, logout } from "../controllers/auth.controller.js";
+ *       import { signup, verifyEmail, login, logout, forgotPassword } from "../controllers/auth.controller.js";
  */
 
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
+
 import {
     generateVerificationToken,
     generateTokenAndSetCookie,
+    generatePasswordResetToken,
 } from "../utils/generateToken.js";
-import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/emails.js";
+import {
+    sendVerificationEmail,
+    sendWelcomeEmail,
+    sendPasswordResetEmail,
+} from "../mailtrap/emails.js";
 
 export const signup = async (req, res) => {
     try {
@@ -254,6 +280,42 @@ export const logout = (req, res) => {
         if (error.name === "ValidationError") {
             return res.status(400).json({ message: error.message });
         }
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const clientUrl = process.env.CLIENT_URL;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res
+                .status(404)
+                .json({ success: false, message: "User not found" });
+        }
+
+        // Generate a password reset token
+        const resetToken = generatePasswordResetToken();
+        const resetTokenExpires = Date.now() + 60 * 60 * 1000; // 1 hour from now
+
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = resetTokenExpires;
+
+        await user.save();
+
+        //Send password reset email
+        await sendPasswordResetEmail(
+            user,
+            `${clientUrl}/reset-password?token=${resetToken}`
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset email sent",
+        });
+    } catch (error) {
+        console.error("Error in forgotPassword controller:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };
