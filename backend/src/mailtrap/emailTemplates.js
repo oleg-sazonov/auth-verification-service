@@ -23,7 +23,7 @@ export const VERIFICATION_EMAIL_TEMPLATE = `
                 text-align: center;
             "
         >
-            <h1 style="color: white; margin: 0">Verify Your Email</h1>
+            <h1 style="color: white; margin: 0">Verify Your Email!</h1>
         </div>
         <div
             style="
@@ -98,7 +98,7 @@ export const PASSWORD_RESET_SUCCESS_TEMPLATE = `
                 text-align: center;
             "
         >
-            <h1 style="color: white; margin: 0">Password Reset Successful</h1>
+            <h1 style="color: white; margin: 0">Password Reset Successful!</h1>
         </div>
         <div
             style="
@@ -184,7 +184,7 @@ export const PASSWORD_RESET_REQUEST_TEMPLATE = `
                 text-align: center;
             "
         >
-            <h1 style="color: white; margin: 0">Password Reset</h1>
+            <h1 style="color: white; margin: 0">Password Reset!</h1>
         </div>
         <div
             style="
@@ -259,7 +259,7 @@ export const WELCOME_EMAIL_TEMPLATE = `
                 text-align: center;
             "
         >
-            <h1 style="color: white; margin: 0">Welcome to Our Service</h1>
+            <h1 style="color: white; margin: 0">Welcome to Our Service!</h1>
         </div>
         <div
             style="
