@@ -50,7 +50,7 @@ export const mailtrapClient = new MailtrapClient({
 });
 
 export const mailtrapSender = {
-    email: "hello@demomailtrap.co",
+    email: "no-reply@oleg-sazonov.com",
     name: "auth-verification-service",
 };
 
