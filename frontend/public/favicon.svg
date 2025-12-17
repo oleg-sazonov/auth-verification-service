@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Background (transparent) -->
+
+  <!-- Shield -->
+  <path d="M32 4
+       L54 12
+       V32
+       C54 44 44 54 32 60
+       C20 54 10 44 10 32
+       V12
+       Z" fill="#22c55e"></path>
+
+  <!-- Inner shield highlight -->
+  <path d="M32 8
+       L50 15
+       V32
+       C50 42 42 50 32 55
+       C22 50 14 42 14 32
+       V15
+       Z" fill="#16a34a"></path>
+
+  <!-- Checkmark (certification) -->
+  <path d="M24 33
+       L29 38
+       L40 26" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
