@@ -1,20 +1,32 @@
-import Input from "../components/Input";
 import { Mail, User, Lock } from "lucide-react";
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
 import SubmitButton from "../components/SubmitButton";
 import FormCard from "../components/FormCard";
+import Input from "../components/Input";
+
+import { useAuthStore } from "../store/authStore";
 
 const SignUp = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleSignUp = (e: FormEvent<HTMLFormElement>) => {
+    const { signup, isLoading, error } = useAuthStore();
+
+    const navigate = useNavigate();
+
+    const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Handle sign-up logic here
-        console.log("Signing up with:", { name, email, password });
+        try {
+            await signup(name, email, password);
+            navigate("/verify-email");
+        } catch (error) {
+            // Error is already handled in the store
+            console.error("Signup failed:", error);
+        }
     };
 
     return (
@@ -33,6 +45,11 @@ const SignUp = () => {
             }
         >
             <form onSubmit={handleSignUp} className="mt-8">
+                {error && (
+                    <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/50 text-red-500 text-sm">
+                        {error}
+                    </div>
+                )}
                 <Input
                     icon={User}
                     type="text"
@@ -61,7 +78,7 @@ const SignUp = () => {
                     }
                 />
                 <PasswordStrengthMeter password={password} />
-                <SubmitButton type="submit" isLoading={false}>
+                <SubmitButton type="submit" isLoading={isLoading}>
                     Sign Up
                 </SubmitButton>
             </form>

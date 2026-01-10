@@ -1,5 +1,6 @@
 import "./config/envs/env.config.js";
 import express from "express";
+import cors from "cors";
 
 import compression from "compression";
 import cookieParser from "cookie-parser";
@@ -9,6 +10,16 @@ import { connectDB } from "./config/db/db.config.js";
 import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
+
+// CORS configuration - must be before other middleware
+app.use(
+    cors({
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        credentials: true, // Allow cookies to be sent
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+    })
+);
 
 app.use(express.json());
 app.use(cookieParser());
