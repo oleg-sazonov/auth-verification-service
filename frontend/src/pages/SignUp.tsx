@@ -31,7 +31,7 @@ const SignUp = () => {
 
     return (
         <FormCard
-            title="Login"
+            title="Sign Up"
             footer={
                 <p className="text-sm text-gray-400">
                     Already have an account?{" "}

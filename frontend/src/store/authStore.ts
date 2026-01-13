@@ -24,13 +24,13 @@ interface AuthState {
 // Define the store actions interface
 interface AuthActions {
     signup: (name: string, email: string, password: string) => Promise<void>;
-    login: (email: string, password: string) => Promise<void>;
-    logout: () => Promise<void>;
+    // login: (email: string, password: string) => Promise<void>;
+    // logout: () => Promise<void>;
     verifyEmail: (code: string) => Promise<void>;
-    checkAuth: () => Promise<void>;
-    forgotPassword: (email: string) => Promise<void>;
-    resetPassword: (token: string, password: string) => Promise<void>;
-    clearError: () => void;
+    // checkAuth: () => Promise<void>;
+    // forgotPassword: (email: string) => Promise<void>;
+    // resetPassword: (token: string, password: string) => Promise<void>;
+    // clearError: () => void;
 }
 
 // Combine state and actions
@@ -74,6 +74,31 @@ export const useAuthStore = create<AuthStore>((set) => ({
             const errorMessage = axios.isAxiosError(error)
                 ? error.response?.data?.message || "Signup failed"
                 : "Signup failed";
+
+            set({
+                error: errorMessage,
+                isLoading: false,
+            });
+            throw error;
+        }
+    },
+
+    verifyEmail: async (code: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await api.post("/api/auth/verify-email", {
+                verificationToken: code, // Changed from 'code' to 'verificationToken'
+            });
+            set({
+                user: response.data.user,
+                isAuthenticated: true,
+                isLoading: false,
+            });
+            // return response.data;
+        } catch (error) {
+            const errorMessage = axios.isAxiosError(error)
+                ? error.response?.data?.message || "Email verification failed"
+                : "Email verification failed";
 
             set({
                 error: errorMessage,

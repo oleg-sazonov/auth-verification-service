@@ -2,8 +2,8 @@
  * Email Verification Page
  * ------------------------
  * This component renders the email verification page, where users can input a 6-digit verification code
- * sent to their email address. It includes input fields for the code, auto-focus and auto-submit functionality,
- * and a submit button.
+ * sent to their email address. It includes input fields for the code, auto-focus functionality,
+ * validation, and a submit button.
  *
  * ### Features
  * - **6-Digit Code Input**:
@@ -12,10 +12,11 @@
  * - **Auto-Focus**:
  *   - Automatically focuses on the first input field when the component mounts.
  *   - Moves focus to the next input field as the user types.
- * - **Auto-Submit**:
- *   - (Commented out) Automatically submits the form when all 6 digits are filled.
  * - **Validation**:
  *   - Ensures all 6 digits are entered before submission.
+ *   - Displays an error message if the code is incomplete.
+ * - **Error Handling**:
+ *   - Displays server-side errors from the `verifyEmail` function.
  * - **Reusable Submit Button**:
  *   - Uses the `SubmitButton` component for consistent styling and loading state handling.
  *
@@ -27,10 +28,10 @@
  *   - **Type**: `string[]`
  *   - **Default**: `["", "", "", "", "", ""]`
  *   - **Description**: Stores the 6-digit verification code entered by the user.
- * - `isLoading`:
- *   - **Type**: `boolean`
- *   - **Default**: `false`
- *   - **Description**: Represents the loading state of the form submission.
+ * - `localError`:
+ *   - **Type**: `string | null`
+ *   - **Default**: `null`
+ *   - **Description**: Stores client-side validation errors.
  *
  * ### Refs
  * - `inputRefs`:
@@ -43,15 +44,27 @@
  *   - **Parameters**:
  *     - `index`: The index of the input field being updated.
  *     - `value`: The new value entered by the user.
+ *   - **Behavior**:
+ *     - Validates the input to ensure only numeric values are accepted.
+ *     - Handles pasting of multiple characters.
+ *     - Moves focus to the next input field after a valid input.
+ *
  * - `handleKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>)`:
  *   - **Description**: Handles the `Backspace` key to move focus to the previous input field.
  *   - **Parameters**:
  *     - `index`: The index of the input field.
  *     - `e`: The keyboard event.
+ *
  * - `handleSubmit(e: React.FormEvent)`:
- *   - **Description**: Handles form submission, validates the code, and logs the verification code.
+ *   - **Description**: Handles form submission, validates the code, and calls the `verifyEmail` function.
  *   - **Parameters**:
  *     - `e`: The form event.
+ *   - **Behavior**:
+ *     - Validates that all 6 digits are entered.
+ *     - Calls the `verifyEmail` function from the `useAuthStore`.
+ *     - Navigates to the home page on successful verification.
+ *     - Displays a success toast on successful verification.
+ *     - Logs errors to the console on failure.
  *
  * ### Usage Example
  * ```tsx
@@ -67,26 +80,35 @@
  * - Includes responsive and accessible styles for input fields and the submit button.
  *
  * ### Dependencies
- * - `framer-motion`: For animations.
  * - `react-router-dom`: For navigation.
- * - `SubmitButton`: A reusable button component with consistent styling and loading state support.
+ * - `react-hot-toast`: For displaying success and error messages.
+ * - `zustand`: For state management via the `useAuthStore`.
+ * - `FormCard`: A reusable card component for consistent form styling.
+ * - `SubmitButton`: A reusable button component with loading state support.
  *
  * ### Notes
- * - The `isLoading` state is currently hardcoded as `false`. Replace it with actual loading logic as needed.
- * - The auto-submit functionality is commented out but can be enabled if required.
+ * - The `isLoading` state is managed by the `useAuthStore` and is used to disable the submit button during API calls.
+ * - The `error` state from the `useAuthStore` is displayed if the server returns an error during verification.
  */
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import SubmitButton from "../components/SubmitButton";
 import FormCard from "../components/FormCard";
 
+import { useAuthStore } from "../store/authStore";
+
+import toast from "react-hot-toast";
+
 const EmailVerificationPage = () => {
     const [code, setCode] = useState(["", "", "", "", "", ""]);
+    const [localError, setLocalError] = useState<string | null>(null);
+
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const navigate = useNavigate(); // For navigation after verification
 
-    const isLoading = false; // Replace with actual loading state
+    const { verifyEmail, isLoading, error } = useAuthStore();
 
     // Focus on the first input when component mounts
     useEffect(() => {
@@ -155,18 +177,27 @@ const EmailVerificationPage = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const verificationCode = code.join("");
 
+        // Clear previous local error
+        setLocalError(null);
+
         // Validate that all 6 digits are filled
         if (verificationCode.length !== 6) {
-            console.log("Please enter all 6 digits");
+            setLocalError("Please enter the complete 6-digit code.");
             return;
         }
 
-        console.log("Submitted verification code:", verificationCode);
-        // TODO: Call API to verify code
+        try {
+            await verifyEmail(verificationCode);
+            navigate("/"); // Navigate to home or dashboard after successful verification
+            toast.success("Email verified successfully!");
+        } catch (error) {
+            console.log(error);
+            // toast.error("Email verification failed. Please try again.");
+        }
     };
 
     return (
@@ -193,6 +224,12 @@ const EmailVerificationPage = () => {
                         />
                     ))}
                 </div>
+
+                {(localError || error) && (
+                    <p className="text-red-500 text-sm mb-2">
+                        {localError || error}
+                    </p>
+                )}
 
                 <SubmitButton type="submit" isLoading={isLoading}>
                     Verify Email

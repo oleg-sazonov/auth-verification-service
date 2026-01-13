@@ -1,9 +1,12 @@
 import { Route, Routes } from "react-router";
+
 import Home from "./pages/Home";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
+
+import { Toaster } from "react-hot-toast";
 
 function App() {
     return (
@@ -24,6 +27,7 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
             </Routes>
+            <Toaster />
         </div>
     );
 }
