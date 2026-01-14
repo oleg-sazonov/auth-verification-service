@@ -27,7 +27,7 @@ interface AuthActions {
     // login: (email: string, password: string) => Promise<void>;
     // logout: () => Promise<void>;
     verifyEmail: (code: string) => Promise<void>;
-    // checkAuth: () => Promise<void>;
+    checkAuth: () => Promise<void>;
     // forgotPassword: (email: string) => Promise<void>;
     // resetPassword: (token: string, password: string) => Promise<void>;
     // clearError: () => void;
@@ -105,6 +105,22 @@ export const useAuthStore = create<AuthStore>((set) => ({
                 isLoading: false,
             });
             throw error;
+        }
+    },
+
+    checkAuth: async () => {
+        set({ isCheckingAuth: true, error: null });
+
+        try {
+            const response = await api.get("/api/auth/check-auth");
+            set({
+                user: response.data.user,
+                isAuthenticated: true,
+                isCheckingAuth: false,
+            });
+        } catch (error) {
+            console.log(error);
+            set({ error: null, isAuthenticated: false, isCheckingAuth: false });
         }
     },
 }));
