@@ -175,7 +175,41 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
             </Routes>
-            <Toaster />
+            <Toaster
+                position="top-center"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        background: "#1f2937", // gray-800
+                        color: "#d1fae5", // emerald-100
+                        border: "1px solid #374151", // gray-700
+                        padding: "16px",
+                        borderRadius: "8px",
+                    },
+                    success: {
+                        iconTheme: {
+                            primary: "#10b981", // emerald-500
+                            secondary: "#d1fae5", // emerald-100
+                        },
+                        style: {
+                            background: "#1f2937", // gray-800
+                            color: "#d1fae5", // emerald-100
+                            border: "1px solid #10b981", // emerald-500
+                        },
+                    },
+                    error: {
+                        iconTheme: {
+                            primary: "#ef4444", // red-500
+                            secondary: "#fecaca", // red-200
+                        },
+                        style: {
+                            background: "#1f2937", // gray-800
+                            color: "#fecaca", // red-200
+                            border: "1px solid #ef4444", // red-500
+                        },
+                    },
+                }}
+            />
         </div>
     );
 }

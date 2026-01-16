@@ -25,7 +25,7 @@ interface AuthState {
 interface AuthActions {
     signup: (name: string, email: string, password: string) => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
-    // logout: () => Promise<void>;
+    logout: () => Promise<void>;
     verifyEmail: (code: string) => Promise<void>;
     checkAuth: () => Promise<void>;
     // forgotPassword: (email: string) => Promise<void>;
@@ -109,6 +109,28 @@ export const useAuthStore = create<AuthStore>((set) => ({
         }
     },
 
+    logout: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            await api.post("/api/auth/logout");
+            set({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+            });
+        } catch (error) {
+            const errorMessage = axios.isAxiosError(error)
+                ? error.response?.data?.message || "Logout failed"
+                : "Logout failed";
+
+            set({
+                error: errorMessage,
+                isLoading: false,
+            });
+            throw error;
+        }
+    },
+
     verifyEmail: async (code: string) => {
         set({ isLoading: true, error: null });
         try {
@@ -135,6 +157,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     },
 
     checkAuth: async () => {
+        // await new Promise((r) => setTimeout(r, 3000)); // Simulate delay
         set({ isCheckingAuth: true, error: null });
 
         try {

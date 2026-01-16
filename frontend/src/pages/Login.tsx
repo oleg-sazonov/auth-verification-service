@@ -42,7 +42,7 @@ const Login = () => {
                 <Input
                     icon={Mail}
                     type="text"
-                    placeholder="Full Name"
+                    placeholder="Email"
                     value={email}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         setEmail(e.target.value)
