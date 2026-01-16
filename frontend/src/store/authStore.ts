@@ -24,7 +24,7 @@ interface AuthState {
 // Define the store actions interface
 interface AuthActions {
     signup: (name: string, email: string, password: string) => Promise<void>;
-    // login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<void>;
     // logout: () => Promise<void>;
     verifyEmail: (code: string) => Promise<void>;
     checkAuth: () => Promise<void>;
@@ -74,6 +74,32 @@ export const useAuthStore = create<AuthStore>((set) => ({
             const errorMessage = axios.isAxiosError(error)
                 ? error.response?.data?.message || "Signup failed"
                 : "Signup failed";
+
+            set({
+                error: errorMessage,
+                isLoading: false,
+            });
+            throw error;
+        }
+    },
+
+    login: async (email: string, password: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await api.post("/api/auth/login", {
+                email,
+                password,
+            });
+
+            set({
+                user: response.data.user,
+                isAuthenticated: true,
+                isLoading: false,
+            });
+        } catch (error) {
+            const errorMessage = axios.isAxiosError(error)
+                ? error.response?.data?.message || "Login failed"
+                : "Login failed";
 
             set({
                 error: errorMessage,

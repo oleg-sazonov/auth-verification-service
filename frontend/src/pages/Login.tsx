@@ -1,19 +1,27 @@
-import { Mail, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, type FormEvent, type ChangeEvent } from "react";
+
+import { Mail, Lock } from "lucide-react";
+
 import Input from "../components/Input";
 import SubmitButton from "../components/SubmitButton";
 import FormCard from "../components/FormCard";
 
+import { useAuthStore } from "../store/authStore";
+
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const isLoading = false; // Replace with actual loading state
+    const { isLoading, login, error } = useAuthStore();
 
-    const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log("Logging in with:", { email, password });
+
+        try {
+            await login(email, password);
+        } catch (error) {
+            console.error("Login failed:", error);
+        }
     };
     return (
         <FormCard
@@ -57,6 +65,11 @@ const Login = () => {
                         Forgot Password?
                     </Link>
                 </div>
+                {error && (
+                    <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/50 text-red-500 text-sm">
+                        {error}
+                    </div>
+                )}
 
                 <SubmitButton type="submit" isLoading={isLoading}>
                     Login
