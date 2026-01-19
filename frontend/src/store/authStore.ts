@@ -19,6 +19,7 @@ interface AuthState {
     isLoading: boolean;
     isCheckingAuth: boolean;
     error: string | null;
+    message: string | null;
 }
 
 // Define the store actions interface
@@ -28,7 +29,7 @@ interface AuthActions {
     logout: () => Promise<void>;
     verifyEmail: (code: string) => Promise<void>;
     checkAuth: () => Promise<void>;
-    // forgotPassword: (email: string) => Promise<void>;
+    forgotPassword: (email: string) => Promise<void>;
     // resetPassword: (token: string, password: string) => Promise<void>;
     // clearError: () => void;
 }
@@ -54,6 +55,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     isLoading: false,
     isCheckingAuth: true,
     error: null,
+    message: null,
 
     // Actions
     signup: async (name: string, email: string, password: string) => {
@@ -170,6 +172,25 @@ export const useAuthStore = create<AuthStore>((set) => ({
         } catch (error) {
             console.log(error);
             set({ error: null, isAuthenticated: false, isCheckingAuth: false });
+        }
+    },
+
+    forgotPassword: async (email: string) => {
+        set({ isLoading: true, error: null, message: null });
+        try {
+            const response = await api.post("/api/auth/forgot-password", {
+                email,
+            });
+            set({ isLoading: false, message: response.data.message });
+            return response.data;
+        } catch (error) {
+            set({ isLoading: false });
+            const errorMessage = axios.isAxiosError(error)
+                ? error.response?.data?.message ||
+                  "Forgot password request failed"
+                : "Forgot password request failed";
+            set({ error: errorMessage });
+            throw error;
         }
     },
 }));

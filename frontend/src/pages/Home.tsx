@@ -3,6 +3,7 @@ import { LogOut } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../store/authStore";
 import { formatDate, formatDateTime } from "../utils/date";
+import Button from "../components/Button";
 
 const Home = () => {
     const { user, logout } = useAuthStore();
@@ -111,7 +112,7 @@ const Home = () => {
                             </div>
                         </div>
                         {/* Logout Button */}
-                        <motion.button
+                        {/* <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleLogout}
@@ -119,7 +120,11 @@ const Home = () => {
                         >
                             <LogOut className="w-5 h-5" />
                             Logout
-                        </motion.button>
+                        </motion.button> */}
+                        <Button variant="danger" onClick={handleLogout}>
+                            <LogOut className="w-5 h-5" />
+                            Logout
+                        </Button>
                     </motion.div>
                 </div>
             </div>

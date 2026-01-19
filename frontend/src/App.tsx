@@ -48,6 +48,10 @@
  * - `/verify-email`:
  *   - Public route.
  *   - Displays the `EmailVerificationPage` component.
+ * - `/forgot-password`:
+ *   - Public route.
+ *   - Displays the `ForgotPasswordPage` component.
+ *   - Redirects authenticated and verified users to `/`.
  * - `*`:
  *   - Catch-all route.
  *   - Displays the `NotFound` component for undefined routes.
@@ -89,6 +93,7 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 import LoadingSpinner from "./components/LoadingSpinner";
 
@@ -123,7 +128,7 @@ const RedirectAuthenticatedUser = ({ children }: { children: JSX.Element }) => {
 };
 
 function App() {
-    const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
+    const { isCheckingAuth, checkAuth } = useAuthStore();
 
     useEffect(() => {
         checkAuth();
@@ -134,8 +139,6 @@ function App() {
         return <LoadingSpinner />;
     }
 
-    console.log("isAuthenticated", isAuthenticated);
-    console.log("user", user);
     return (
         <div className="min-h-screen bg-gray-950 text-emerald-50 relative overflow-hidden flex items-center justify-center px-4">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12)_1px,transparent_1px)] bg-size-[32px_32px] opacity-60" />
@@ -171,6 +174,15 @@ function App() {
                 <Route
                     path="/verify-email"
                     element={<EmailVerificationPage />}
+                />
+
+                <Route
+                    path="/forgot-password"
+                    element={
+                        <RedirectAuthenticatedUser>
+                            <ForgotPasswordPage />
+                        </RedirectAuthenticatedUser>
+                    }
                 />
 
                 <Route path="*" element={<NotFound />} />
