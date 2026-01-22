@@ -77,7 +77,7 @@
  */
 
 import { Link } from "react-router-dom";
-import { useState, type FormEvent, type ChangeEvent } from "react";
+import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
 
 import { Mail, Lock } from "lucide-react";
 
@@ -91,6 +91,11 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { isLoading, login, error } = useAuthStore();
+
+    // Clear error when component mounts
+    useEffect(() => {
+        useAuthStore.setState({ error: null, message: null });
+    }, []);
 
     const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

@@ -1,5 +1,5 @@
 import { Mail, User, Lock } from "lucide-react";
-import { useState, type FormEvent, type ChangeEvent } from "react";
+import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
@@ -17,6 +17,11 @@ const SignUp = () => {
     const { signup, isLoading, error } = useAuthStore();
 
     const navigate = useNavigate();
+
+    // Clear error when component mounts
+    useEffect(() => {
+        useAuthStore.setState({ error: null, message: null });
+    }, []);
 
     const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

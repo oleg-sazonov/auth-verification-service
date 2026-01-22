@@ -81,7 +81,7 @@
  */
 
 import { motion } from "framer-motion";
-import { useState, type FormEvent, type ChangeEvent } from "react";
+import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
 import { ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -95,6 +95,11 @@ const ForgotPasswordPage = () => {
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const { isLoading, error, forgotPassword } = useAuthStore();
+
+    // Clear error when component mounts
+    useEffect(() => {
+        useAuthStore.setState({ error: null, message: null });
+    }, []);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

@@ -21,6 +21,16 @@
  * - `forgotPassword(email)` - Send password reset email
  * - `resetPassword(token, password)` - Reset password with token
  *
+ * ## Rate Limiting
+ * - All actions handle 429 (Too Many Requests) status codes
+ * - Rate limit errors display user-friendly messages
+ * - Backend rate limits:
+ *   - signup: 15 requests per 15 minutes
+ *   - login: 5 requests per 15 minutes
+ *   - verifyEmail: 10 requests per hour
+ *   - forgotPassword: 3 requests per hour
+ *   - resetPassword: 5 requests per 15 minutes
+ *
  * ## Usage
  * ```typescript
  * const { user, isAuthenticated, login, logout } = useAuthStore();
@@ -42,6 +52,7 @@
  * ## Related Files
  * - Frontend: [App.tsx](frontend/src/App.tsx), [Login.tsx](frontend/src/pages/Login.tsx), [SignUp.tsx](frontend/src/pages/SignUp.tsx)
  * - Backend: [auth.routes.js](backend/src/routes/auth.routes.js), [auth.controller.js](backend/src/controllers/auth.controller.js)
+ * - Backend: [rateLimiter.js](backend/src/middleware/rateLimiter.js) - Rate limiting middleware
  */
 
 import { create } from "zustand";
@@ -118,14 +129,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
                 isLoading: false,
             });
         } catch (error) {
-            const errorMessage = axios.isAxiosError(error)
-                ? error.response?.data?.message || "Signup failed"
-                : "Signup failed";
+            // Check for rate limit status code
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                set({
+                    error:
+                        error.response.data.message ||
+                        "Too many signup attempts. Please try again later.",
+                    isLoading: false,
+                });
+            } else {
+                const errorMessage = axios.isAxiosError(error)
+                    ? error.response?.data?.message || "Signup failed"
+                    : "Signup failed";
 
-            set({
-                error: errorMessage,
-                isLoading: false,
-            });
+                set({
+                    error: errorMessage,
+                    isLoading: false,
+                });
+            }
             throw error;
         }
     },
@@ -144,14 +165,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
                 isLoading: false,
             });
         } catch (error) {
-            const errorMessage = axios.isAxiosError(error)
-                ? error.response?.data?.message || "Login failed"
-                : "Login failed";
+            // Check for rate limit status code
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                set({
+                    error:
+                        error.response.data.message ||
+                        "Too many login attempts. Please try again after 15 minutes.",
+                    isLoading: false,
+                });
+            } else {
+                const errorMessage = axios.isAxiosError(error)
+                    ? error.response?.data?.message || "Login failed"
+                    : "Login failed";
 
-            set({
-                error: errorMessage,
-                isLoading: false,
-            });
+                set({
+                    error: errorMessage,
+                    isLoading: false,
+                });
+            }
             throw error;
         }
     },
@@ -191,14 +222,25 @@ export const useAuthStore = create<AuthStore>((set) => ({
             });
             // return response.data;
         } catch (error) {
-            const errorMessage = axios.isAxiosError(error)
-                ? error.response?.data?.message || "Email verification failed"
-                : "Email verification failed";
+            // Check for rate limit status code
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                set({
+                    error:
+                        error.response.data.message ||
+                        "Too many verification attempts. Please try again later.",
+                    isLoading: false,
+                });
+            } else {
+                const errorMessage = axios.isAxiosError(error)
+                    ? error.response?.data?.message ||
+                      "Email verification failed"
+                    : "Email verification failed";
 
-            set({
-                error: errorMessage,
-                isLoading: false,
-            });
+                set({
+                    error: errorMessage,
+                    isLoading: false,
+                });
+            }
             throw error;
         }
     },
@@ -229,12 +271,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
             set({ isLoading: false, message: response.data.message });
             return response.data;
         } catch (error) {
-            set({ isLoading: false });
-            const errorMessage = axios.isAxiosError(error)
-                ? error.response?.data?.message ||
-                  "Forgot password request failed"
-                : "Forgot password request failed";
-            set({ error: errorMessage });
+            // Check for rate limit status code
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                set({
+                    error:
+                        error.response.data.message ||
+                        "Too many password reset requests. Please try again later.",
+                    isLoading: false,
+                });
+            } else {
+                const errorMessage = axios.isAxiosError(error)
+                    ? error.response?.data?.message ||
+                      "Forgot password request failed"
+                    : "Forgot password request failed";
+                set({ error: errorMessage, isLoading: false });
+            }
             throw error;
         }
     },
@@ -254,11 +305,20 @@ export const useAuthStore = create<AuthStore>((set) => ({
             });
             return response.data;
         } catch (error) {
-            set({ isLoading: false });
-            const errorMessage = axios.isAxiosError(error)
-                ? error.response?.data?.message || "Password reset failed"
-                : "Password reset failed";
-            set({ error: errorMessage });
+            // Check for rate limit status code
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                set({
+                    error:
+                        error.response.data.message ||
+                        "Too many password reset attempts. Please try again after 15 minutes.",
+                    isLoading: false,
+                });
+            } else {
+                const errorMessage = axios.isAxiosError(error)
+                    ? error.response?.data?.message || "Password reset failed"
+                    : "Password reset failed";
+                set({ error: errorMessage, isLoading: false });
+            }
             throw error;
         }
     },
