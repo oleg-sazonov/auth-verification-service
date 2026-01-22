@@ -1,3 +1,85 @@
+/**
+ * Forgot Password Page
+ * ---------------------
+ * This component renders the "Forgot Password" page, allowing users to request a password reset link
+ * by entering their email address. It includes form validation, error handling, and a success message
+ * upon submission.
+ *
+ * ### Features
+ * - **Form Inputs**:
+ *   - Email input field with validation.
+ *   - Uses the `Input` component for consistent styling.
+ * - **Error Handling**:
+ *   - Displays error messages from the `useAuthStore` if the password reset request fails.
+ * - **Loading State**:
+ *   - Disables the submit button and shows a loading spinner during the password reset request.
+ * - **Success Message**:
+ *   - Displays a confirmation message after the reset link is sent.
+ * - **Navigation**:
+ *   - Includes a link to navigate back to the "Login" page.
+ *
+ * ### Props
+ * - None (state and actions are managed via Zustand's `useAuthStore`).
+ *
+ * ### State
+ * - `email`:
+ *   - **Type**: `string`
+ *   - **Default**: `""`
+ *   - **Description**: Stores the user's email input.
+ * - `isSubmitted`:
+ *   - **Type**: `boolean`
+ *   - **Default**: `false`
+ *   - **Description**: Tracks whether the password reset request has been successfully submitted.
+ *
+ * ### Workflow
+ * 1. **User Input**:
+ *    - User enters their email address into the input field.
+ * 2. **Form Submission**:
+ *    - On form submission, the `handleSubmit` function is called.
+ *    - Calls the `forgotPassword` action from the `useAuthStore` to send the reset link.
+ * 3. **Error Handling**:
+ *    - If the request fails, the error message is displayed above the input field.
+ * 4. **Success Message**:
+ *    - If the request succeeds, a confirmation message is displayed.
+ *
+ * ### Error Handling
+ * - Errors from the `forgotPassword` action are stored in the `error` state of the `useAuthStore`.
+ * - The error message is displayed in a styled alert box above the input field.
+ *
+ * ### Components Used
+ * - `FormCard`: A reusable card component for consistent form styling.
+ * - `Input`: A reusable input component for the email field.
+ * - `SubmitButton`: A reusable button component with a loading state.
+ *
+ * ### Dependencies
+ * - `zustand`: For state management (`useAuthStore`).
+ * - `react-router-dom`: For navigation to the "Login" page.
+ * - `lucide-react`: For rendering icons in the input field and success message.
+ * - `framer-motion`: For animations on the success message.
+ *
+ * ### Related Files
+ * - `authStore.ts`: Contains the `forgotPassword` function for API integration.
+ * - `Login.tsx`: Related page for user authentication.
+ *
+ * ### Usage Example
+ * ```tsx
+ * import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+ *
+ * const App = () => {
+ *   return <ForgotPasswordPage />;
+ * };
+ * ```
+ *
+ * ### Styling
+ * - Utilizes Tailwind CSS for styling.
+ * - Includes responsive and accessible styles for the input field, submit button, and success message.
+ *
+ * ### Notes
+ * - The `isLoading` state is managed by the `useAuthStore` and is used to disable the submit button during API calls.
+ * - The `error` state from the `useAuthStore` is displayed if the password reset request fails.
+ * - The success message is displayed conditionally based on the `isSubmitted` state.
+ */
+
 import { motion } from "framer-motion";
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import { ArrowLeft, Mail } from "lucide-react";
@@ -82,7 +164,9 @@ const ForgotPasswordPage = () => {
                         <span className="font-semibold text-emerald-400">
                             {email}
                         </span>
-                        , you will receive a password reset link shortly.
+                        , you will receive a password reset link within 10-15
+                        minutes. Please check your spam folder if you don't see
+                        it.
                     </p>
                 </motion.div>
             )}

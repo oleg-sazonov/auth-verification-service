@@ -1,3 +1,81 @@
+/**
+ * Login Component
+ * ---------------
+ * This component renders the login page, allowing users to authenticate by entering their email and password.
+ * It includes form validation, error handling, and a loading state during the login process.
+ *
+ * ### Features
+ * - **Form Inputs**:
+ *   - Email and password fields with validation.
+ *   - Uses the `Input` component for consistent styling.
+ * - **Error Handling**:
+ *   - Displays error messages from the `useAuthStore` if login fails.
+ * - **Loading State**:
+ *   - Disables the submit button and shows a loading spinner during the login process.
+ * - **Navigation**:
+ *   - Includes links to the "Sign Up" and "Forgot Password" pages.
+ *
+ * ### Props
+ * - None (state and actions are managed via Zustand's `useAuthStore`).
+ *
+ * ### State
+ * - `email`:
+ *   - **Type**: `string`
+ *   - **Default**: `""`
+ *   - **Description**: Stores the user's email input.
+ * - `password`:
+ *   - **Type**: `string`
+ *   - **Default**: `""`
+ *   - **Description**: Stores the user's password input.
+ *
+ * ### Workflow
+ * 1. **User Input**:
+ *    - User enters their email and password into the form fields.
+ * 2. **Form Submission**:
+ *    - On form submission, the `handleLogin` function is called.
+ *    - Calls the `login` action from the `useAuthStore` to authenticate the user.
+ * 3. **Error Handling**:
+ *    - If the login fails, the error message is displayed above the submit button.
+ * 4. **Loading State**:
+ *    - The submit button is disabled, and a loading spinner is displayed while the login request is in progress.
+ *
+ * ### Error Handling
+ * - Errors from the `login` action are stored in the `error` state of the `useAuthStore`.
+ * - The error message is displayed in a styled alert box above the submit button.
+ *
+ * ### Components Used
+ * - `FormCard`: A reusable card component for consistent form styling.
+ * - `Input`: A reusable input component for the email and password fields.
+ * - `SubmitButton`: A reusable button component with a loading state.
+ *
+ * ### Dependencies
+ * - `zustand`: For state management (`useAuthStore`).
+ * - `react-router-dom`: For navigation to the "Sign Up" and "Forgot Password" pages.
+ * - `lucide-react`: For rendering icons in the input fields.
+ *
+ * ### Related Files
+ * - `authStore.ts`: Contains the `login` function for API integration.
+ * - `SignUp.tsx`: Related page for user registration.
+ * - `ForgotPasswordPage.tsx`: Related page for password reset requests.
+ *
+ * ### Usage Example
+ * ```tsx
+ * import Login from "./pages/Login";
+ *
+ * const App = () => {
+ *   return <Login />;
+ * };
+ * ```
+ *
+ * ### Styling
+ * - Utilizes Tailwind CSS for styling.
+ * - Includes responsive and accessible styles for input fields and the submit button.
+ *
+ * ### Notes
+ * - The `isLoading` state is managed by the `useAuthStore` and is used to disable the submit button during API calls.
+ * - The `error` state from the `useAuthStore` is displayed if the login request fails.
+ */
+
 import { Link } from "react-router-dom";
 import { useState, type FormEvent, type ChangeEvent } from "react";
 

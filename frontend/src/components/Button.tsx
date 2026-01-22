@@ -1,7 +1,7 @@
 /**
  * Button Component
  * ----------------
- * A reusable button component with variant support and consistent styling.
+ * A reusable button component with variant support, loading state, and consistent styling.
  * Built with TypeScript for strong typing and Framer Motion for animations.
  *
  * ### Props
@@ -9,20 +9,42 @@
  *   - **Type**: `"primary" | "danger"`
  *   - **Default**: `"primary"`
  *   - **Description**: Determines the button's color scheme.
+ *     - `"primary"`: Emerald green theme for standard actions.
+ *     - `"danger"`: Red theme for destructive actions.
+ *
  * - `isLoading` (optional):
  *   - **Type**: `boolean`
  *   - **Default**: `false`
  *   - **Description**: Shows a loading spinner when true and disables the button.
+ *
  * - `children` (required):
  *   - **Type**: `React.ReactNode`
- *   - **Description**: The button content (text, icons, etc.).
+ *   - **Description**: The button content (e.g., text, icons, or other elements).
+ *
  * - `className` (optional):
  *   - **Type**: `string`
  *   - **Default**: `""`
- *   - **Description**: Additional Tailwind classes for customization.
+ *   - **Description**: Additional Tailwind CSS classes for customization.
+ *
+ * - `disabled` (optional):
+ *   - **Type**: `boolean`
+ *   - **Default**: `false`
+ *   - **Description**: Disables the button when true.
+ *
  * - `...props`:
- *   - **Type**: `ComponentPropsWithoutRef<"button">`
- *   - **Description**: All valid `<button>` attributes (e.g., `type`, `onClick`, `disabled`).
+ *   - **Type**: `HTMLMotionProps<"button">`
+ *   - **Description**: All valid `<button>` attributes (e.g., `type`, `onClick`, `aria-*`).
+ *
+ * ### Features
+ * - **Variants**:
+ *   - `"primary"`: Styled for standard actions with emerald green.
+ *   - `"danger"`: Styled for destructive actions with red.
+ *
+ * - **Loading State**:
+ *   - Displays a spinner and disables the button when `isLoading` is true.
+ *
+ * - **Animations**:
+ *   - Hover and tap animations using Framer Motion.
  *
  * ### Usage Example
  * ```tsx
@@ -34,7 +56,7 @@
  *     <Button variant="primary" onClick={handleClick}>
  *       Save Changes
  *     </Button>
- *     <Button variant="danger" onClick={handleLogout}>
+ *     <Button variant="danger" isLoading={true}>
  *       <LogOut className="w-5 h-5" />
  *       Logout
  *     </Button>

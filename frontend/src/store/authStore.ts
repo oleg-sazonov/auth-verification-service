@@ -1,7 +1,53 @@
+/**
+ * Authentication Store (Zustand)
+ * ------------------------------
+ * Global state management for authentication using Zustand and Axios.
+ * Handles user authentication, email verification, and password management with cookie-based sessions.
+ *
+ * ## State
+ * - `user`: User | null - Current authenticated user
+ * - `isAuthenticated`: boolean - Authentication status
+ * - `isLoading`: boolean - Loading state for actions
+ * - `isCheckingAuth`: boolean - Initial auth check loading
+ * - `error`: string | null - Error message from failed operations
+ * - `message`: string | null - Success message from operations
+ *
+ * ## Actions
+ * - `signup(name, email, password)` - Register new user
+ * - `login(email, password)` - Authenticate user
+ * - `logout()` - Clear user session
+ * - `verifyEmail(code)` - Verify email with 6-digit code
+ * - `checkAuth()` - Verify authentication status (called on app load)
+ * - `forgotPassword(email)` - Send password reset email
+ * - `resetPassword(token, password)` - Reset password with token
+ *
+ * ## Usage
+ * ```typescript
+ * const { user, isAuthenticated, login, logout } = useAuthStore();
+ *
+ * // Login example
+ * try {
+ *   await login("email@example.com", "password");
+ *   toast.success("Login successful!");
+ * } catch (error) {
+ *   // Error already set in store.error
+ * }
+ * ```
+ *
+ * ## Configuration
+ * - API Base URL: `VITE_API_URL` env variable or `http://localhost:5000`
+ * - Uses HTTP-only cookies for JWT tokens
+ * - All actions clear previous errors on start
+ *
+ * ## Related Files
+ * - Frontend: [App.tsx](frontend/src/App.tsx), [Login.tsx](frontend/src/pages/Login.tsx), [SignUp.tsx](frontend/src/pages/SignUp.tsx)
+ * - Backend: [auth.routes.js](backend/src/routes/auth.routes.js), [auth.controller.js](backend/src/controllers/auth.controller.js)
+ */
+
 import { create } from "zustand";
 import axios from "axios";
 
-// Define the User interface based on backend API responses
+// User interface from backend API
 interface User {
     _id: string;
     name: string;
@@ -12,7 +58,7 @@ interface User {
     updatedAt: Date;
 }
 
-// Define the store state interface
+// Store state interface
 interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
@@ -22,7 +68,7 @@ interface AuthState {
     message: string | null;
 }
 
-// Define the store actions interface
+// Store actions interface
 interface AuthActions {
     signup: (name: string, email: string, password: string) => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
@@ -30,11 +76,10 @@ interface AuthActions {
     verifyEmail: (code: string) => Promise<void>;
     checkAuth: () => Promise<void>;
     forgotPassword: (email: string) => Promise<void>;
-    // resetPassword: (token: string, password: string) => Promise<void>;
-    // clearError: () => void;
+    resetPassword: (token: string, password: string) => Promise<void>;
 }
 
-// Combine state and actions
+// Combined store type
 type AuthStore = AuthState & AuthActions;
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -189,6 +234,30 @@ export const useAuthStore = create<AuthStore>((set) => ({
                 ? error.response?.data?.message ||
                   "Forgot password request failed"
                 : "Forgot password request failed";
+            set({ error: errorMessage });
+            throw error;
+        }
+    },
+
+    resetPassword: async (token: string, password: string) => {
+        set({ isLoading: true, error: null, message: null });
+        try {
+            const response = await api.post(
+                `/api/auth/reset-password/${token}`,
+                {
+                    password,
+                }
+            );
+            set({
+                isLoading: false,
+                message: response.data.message,
+            });
+            return response.data;
+        } catch (error) {
+            set({ isLoading: false });
+            const errorMessage = axios.isAxiosError(error)
+                ? error.response?.data?.message || "Password reset failed"
+                : "Password reset failed";
             set({ error: errorMessage });
             throw error;
         }

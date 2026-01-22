@@ -112,15 +112,6 @@ const Home = () => {
                             </div>
                         </div>
                         {/* Logout Button */}
-                        {/* <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={handleLogout}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-800 cursor-pointer"
-                        >
-                            <LogOut className="w-5 h-5" />
-                            Logout
-                        </motion.button> */}
                         <Button variant="danger" onClick={handleLogout}>
                             <LogOut className="w-5 h-5" />
                             Logout

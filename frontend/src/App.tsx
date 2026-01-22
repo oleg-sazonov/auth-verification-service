@@ -2,79 +2,111 @@
  * App Component
  * -------------
  * The root component of the application that sets up routing, authentication checks, and global UI elements.
- * It uses `react-router` for navigation and `zustand` for state management.
+ * It uses `react-router-dom` for navigation and `zustand` for state management.
  *
  * ### Features
  * - **Routing**:
  *   - Defines routes for the application, including protected and public routes.
  *   - Handles redirection based on authentication and email verification status.
  * - **Authentication**:
- *   - Uses `isCheckingAuth` to display a loading spinner while verifying authentication status.
- *   - Protects routes that require authentication using the `ProtectedRoute` component.
- *   - Redirects authenticated users away from login/signup pages using the `RedirectAuthenticatedUser` component.
+ *   - Uses `isCheckingAuth` from [`useAuthStore`](frontend/src/store/authStore.ts) to display a loading spinner while verifying authentication status.
+ *   - Protects routes that require authentication using the [`ProtectedRoute`](#protectedroute) wrapper component.
+ *   - Redirects authenticated users away from login/signup pages using the [`RedirectAuthenticatedUser`](#redirectauthenticateduser) wrapper component.
  * - **Global UI**:
- *   - Includes a `Toaster` for displaying toast notifications globally.
- *   - Applies consistent background styling using Tailwind CSS.
+ *   - Includes a `Toaster` component from `react-hot-toast` for displaying toast notifications globally.
+ *   - Applies consistent background styling using Tailwind CSS with gradient overlays and radial patterns.
  *
  * ### Components
- * - `ProtectedRoute`:
- *   - Protects routes that require authentication.
- *   - Redirects unauthenticated users to the login page.
- *   - Redirects users with unverified emails to the email verification page.
- * - `RedirectAuthenticatedUser`:
- *   - Redirects authenticated and verified users away from login/signup pages to the home page.
- * - `LoadingSpinner`:
- *   - Displays a spinner while the app checks authentication status.
+ *
+ * #### ProtectedRoute
+ * A wrapper component that protects routes requiring authentication.
+ * - **Props**:
+ *   - `children`: JSX.Element - The component to render if access is granted.
+ * - **Behavior**:
+ *   - Redirects unauthenticated users to [`/login`](frontend/src/pages/Login.tsx).
+ *   - Redirects authenticated users with unverified emails to [`/verify-email`](frontend/src/pages/EmailVerificationPage.tsx).
+ *   - Renders children if user is authenticated and verified.
+ * - **Usage**:
+ *   ```tsx
+ *   <Route path="/" element={
+ *     <ProtectedRoute>
+ *       <Home />
+ *     </ProtectedRoute>
+ *   } />
+ *   ```
+ *
+ * #### RedirectAuthenticatedUser
+ * A wrapper component that redirects authenticated users away from public-only pages.
+ * - **Props**:
+ *   - `children`: JSX.Element - The component to render if user is not authenticated or not verified.
+ * - **Behavior**:
+ *   - Redirects authenticated and verified users to [`/`](frontend/src/pages/Home.tsx) (home page).
+ *   - Renders children for unauthenticated users or users with unverified emails.
+ * - **Usage**:
+ *   ```tsx
+ *   <Route path="/login" element={
+ *     <RedirectAuthenticatedUser>
+ *       <Login />
+ *     </RedirectAuthenticatedUser>
+ *   } />
+ *   ```
  *
  * ### State Management
- * - **Store**: `useAuthStore` (zustand)
- *   - `isCheckingAuth`: Indicates whether the app is verifying authentication status.
- *   - `isAuthenticated`: Indicates whether the user is authenticated.
- *   - `user`: Contains user details, including `isVerified` status.
- *   - `checkAuth`: Function to verify authentication status on app load.
+ * Uses [`useAuthStore`](frontend/src/store/authStore.ts) from zustand:
+ * - `isCheckingAuth`: `boolean` - Indicates whether the app is verifying authentication status.
+ * - `isAuthenticated`: `boolean` - Indicates whether the user is authenticated.
+ * - `user`: `User | null` - Contains user details, including `isVerified` status.
+ * - `checkAuth()`: `Promise<void>` - Function to verify authentication status, called on app load.
  *
  * ### Routes
- * - `/`:
- *   - Protected route.
- *   - Displays the `Home` component for authenticated and verified users.
- * - `/signup`:
- *   - Public route.
- *   - Displays the `SignUp` component.
+ * - **`/`**:
+ *   - Protected route requiring authentication and email verification.
+ *   - Renders [`Home`](frontend/src/pages/Home.tsx) component.
+ * - **`/signup`**:
+ *   - Public route for user registration.
+ *   - Renders [`SignUp`](frontend/src/pages/SignUp.tsx) component.
  *   - Redirects authenticated and verified users to `/`.
- * - `/login`:
- *   - Public route.
- *   - Displays the `Login` component.
+ * - **`/login`**:
+ *   - Public route for user authentication.
+ *   - Renders [`Login`](frontend/src/pages/Login.tsx) component.
  *   - Redirects authenticated and verified users to `/`.
- * - `/verify-email`:
- *   - Public route.
- *   - Displays the `EmailVerificationPage` component.
- * - `/forgot-password`:
- *   - Public route.
- *   - Displays the `ForgotPasswordPage` component.
+ * - **`/verify-email`**:
+ *   - Public route for email verification.
+ *   - Renders [`EmailVerificationPage`](frontend/src/pages/EmailVerificationPage.tsx) component.
+ *   - No redirect logic (allows both authenticated and unauthenticated access).
+ * - **`/forgot-password`**:
+ *   - Public route for password reset requests.
+ *   - Renders [`ForgotPasswordPage`](frontend/src/pages/ForgotPasswordPage.tsx) component.
  *   - Redirects authenticated and verified users to `/`.
- * - `*`:
- *   - Catch-all route.
- *   - Displays the `NotFound` component for undefined routes.
+ * - **`/reset-password`**:
+ *   - Public route for resetting password with a token.
+ *   - Renders [`ResetPasswordPage`](frontend/src/pages/ResetPasswordPage.tsx) component.
+ *   - Accepts a `token` query parameter (e.g., `/reset-password?token=abc123`).
+ * - **`*`** (Catch-all):
+ *   - Fallback route for undefined paths.
+ *   - Renders [`NotFound`](frontend/src/pages/NotFound.tsx) component.
  *
- * ### Usage
- * - The `App` component is the entry point of the application and is rendered in `main.tsx`.
- *
- * ### Styling
- * - Utilizes Tailwind CSS for consistent and responsive styling.
- * - Includes background gradients and patterns for a visually appealing layout.
+ * ### Lifecycle
+ * 1. **Component Mount**:
+ *    - Calls [`checkAuth()`](frontend/src/store/authStore.ts) via `useEffect` to verify authentication status.
+ *    - Displays [`LoadingSpinner`](frontend/src/components/LoadingSpinner.tsx) while `isCheckingAuth` is `true`.
+ * 2. **Authentication Check Complete**:
+ *    - Renders the appropriate route based on authentication and verification status.
+ *    - Route guards handle redirects automatically.
  *
  * ### Dependencies
- * - `react-router`: For routing and navigation.
- * - `zustand`: For state management.
- * - `react-hot-toast`: For toast notifications.
- * - `LoadingSpinner`: Custom component for loading state.
+ * - [`react-router-dom`](https://reactrouter.com/): For routing (`Navigate`, `Route`, `Routes`).
+ * - [`zustand`](https://github.com/pmndrs/zustand): For state management via [`useAuthStore`](frontend/src/store/authStore.ts).
+ * - [`react-hot-toast`](https://react-hot-toast.com/): For toast notifications (`Toaster`).
+ * - [`LoadingSpinner`](frontend/src/components/LoadingSpinner.tsx): Custom loading component.
  *
- * ### Example
+ * ### Entry Point
+ * This component is rendered in [main.tsx](frontend/src/main.tsx):
  * ```tsx
  * import { StrictMode } from "react";
  * import { createRoot } from "react-dom/client";
  * import { BrowserRouter } from "react-router-dom";
- * import App from "./App";
+ * import App from "./App.tsx";
  *
  * createRoot(document.getElementById("root")!).render(
  *   <StrictMode>
@@ -84,6 +116,11 @@
  *   </StrictMode>
  * );
  * ```
+ *
+ * ### Related Files
+ * - Backend: [server.js](backend/src/server.js) - Handles authentication API endpoints.
+ * - Backend: [auth.routes.js](backend/src/routes/auth.routes.js) - Defines authentication routes.
+ * - Backend: [protectRoute.js](backend/src/middleware/protectRoute.js) - Middleware for route protection.
  */
 
 import { Navigate, Route, Routes } from "react-router";
@@ -94,6 +131,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 import LoadingSpinner from "./components/LoadingSpinner";
 
@@ -184,6 +222,8 @@ function App() {
                         </RedirectAuthenticatedUser>
                     }
                 />
+
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 <Route path="*" element={<NotFound />} />
             </Routes>
