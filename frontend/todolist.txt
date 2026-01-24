@@ -1,2 +1,0 @@
-Add rate limiting - done
-Update NotFound page
