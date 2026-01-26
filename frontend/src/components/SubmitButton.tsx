@@ -1,8 +1,8 @@
 /**
- * Button Component
- * ----------------
- * A reusable button component with consistent styling and loading state support.
- * Built with TypeScript for strong typing and Framer Motion for animations.
+ * SubmitButton Component
+ * ----------------------
+ * A reusable submit button component with loading state support and animations.
+ * Built with TypeScript for strong typing and Framer Motion for smooth interactions.
  *
  * ### Props
  * - `isLoading` (optional):
@@ -12,27 +12,73 @@
  * - `children` (required):
  *   - **Type**: `React.ReactNode`
  *   - **Description**: The button content (text, icons, etc.).
- * - `...props`:
- *   - **Type**: `ComponentPropsWithoutRef<"button">`
- *   - **Description**: All valid `<button>` attributes (e.g., `type`, `onClick`, `disabled`).
+ * - `disabled` (optional):
+ *   - **Type**: `boolean`
+ *   - **Default**: `false`
+ *   - **Description**: Manually disable the button.
+ * - `...props` (optional):
+ *   - **Type**: `Omit<HTMLMotionProps<"button">, "children">`
+ *   - **Description**: All valid Framer Motion button props (e.g., `type`, `onClick`, `className`).
+ *
+ * ### Features
+ * - **Loading State**: Displays a spinning loader icon from `lucide-react` when `isLoading` is true.
+ * - **Auto-disable**: Button is automatically disabled when loading or manually disabled.
+ * - **Hover Animation**: Scales up slightly on hover (1.02x) for visual feedback.
+ * - **Tap Animation**: Scales down slightly on click (0.98x) for tactile feedback.
+ * - **Accessible**: Includes focus ring styles and disabled cursor states.
+ *
+ * ### Styling
+ * - Uses Tailwind CSS for consistent emerald-themed styling.
+ * - Full-width button with rounded corners.
+ * - Disabled state shows reduced opacity and changes cursor.
+ * - Focus ring for keyboard accessibility.
  *
  * ### Usage Example
  * ```tsx
- * import Button from "./components/Button";
+ * import SubmitButton from "./components/SubmitButton";
  *
- * const App = () => (
- *   <Button type="submit" isLoading={false}>
- *     Submit
- *   </Button>
- * );
+ * const LoginForm = () => {
+ *   const [isLoading, setIsLoading] = useState(false);
+ *
+ *   return (
+ *     <form onSubmit={handleSubmit}>
+ *       <SubmitButton type="submit" isLoading={isLoading}>
+ *         Login
+ *       </SubmitButton>
+ *     </form>
+ *   );
+ * };
  * ```
+ *
+ * ### Used In
+ * - [`Login.tsx`](frontend/src/pages/Login.tsx) - Login form submission
+ * - [`SignUp.tsx`](frontend/src/pages/SignUp.tsx) - User registration
+ * - [`EmailVerificationPage.tsx`](frontend/src/pages/EmailVerificationPage.tsx) - Email verification
+ * - [`ForgotPasswordPage.tsx`](frontend/src/pages/ForgotPasswordPage.tsx) - Password reset request
+ * - [`ResetPasswordPage.tsx`](frontend/src/pages/ResetPasswordPage.tsx) - Password reset
+ *
+ * ### Dependencies
+ * - `framer-motion`: For button animations (`motion.button`, `HTMLMotionProps`)
+ * - `lucide-react`: For the loading spinner icon (`Loader`)
+ *
+ * ### TypeScript
+ * - Interface extends `HTMLMotionProps<"button">` but omits `children` to ensure proper typing.
+ * - This prevents conflicts between React's native props and Framer Motion's animation props.
+ *
+ * ### Related Components
+ * - [`Button.tsx`](frontend/src/components/Button.tsx) - General-purpose button with variant support
+ * - [`Input.tsx`](frontend/src/components/Input.tsx) - Form input component
+ * - [`FormCard.tsx`](frontend/src/components/FormCard.tsx) - Form container component
  */
 
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { Loader } from "lucide-react";
-import { type ComponentPropsWithoutRef } from "react";
+// import { type ComponentPropsWithoutRef } from "react";
 
-interface SubmitButtonProps extends ComponentPropsWithoutRef<"button"> {
+interface SubmitButtonProps extends Omit<
+    HTMLMotionProps<"button">,
+    "children"
+> {
     isLoading?: boolean;
     children: React.ReactNode;
 }
